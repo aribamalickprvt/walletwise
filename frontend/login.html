@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | WalletWise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+
+        <!-- Icon + Titles -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-xl mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h1 id="formTitle" class="text-2xl font-bold text-slate-800">Welcome Back</h1>
+            <p id="formSubtitle" class="text-slate-500">Manage your expenses with ease</p>
+        </div>
+
+        <!-- Status message (error / success) -->
+        <div id="statusMsg" class="hidden mb-4 px-4 py-3 rounded-lg text-sm font-medium"></div>
+
+        <!-- ── LOGIN FORM ── -->
+        <form id="loginForm" class="space-y-6" autocomplete="off">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                <input type="text" id="loginUsername" required autocomplete="off"
+                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Enter your username">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                <input type="password" id="loginPassword" required autocomplete="new-password"
+                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    placeholder="••••••••">
+            </div>
+            <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-200">
+                Sign In
+            </button>
+        </form>
+
+        <!-- ── REGISTER FORM (hidden by default) ── -->
+        <form id="registerForm" class="space-y-6 hidden" autocomplete="off">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                <input type="text" id="regUsername" required autocomplete="off" minlength="3" maxlength="50"
+                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Choose a username (min 3 chars)">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                <input type="password" id="regPassword" required autocomplete="new-password" minlength="6"
+                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    placeholder="At least 6 characters">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
+                <input type="password" id="regConfirmPassword" required autocomplete="new-password"
+                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Re-enter your password">
+            </div>
+            <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-200">
+                Create Account
+            </button>
+        </form>
+
+        <!-- Toggle link -->
+        <p class="text-center text-sm text-slate-600 mt-8">
+            <span id="toggleText">Don't have an account?</span>
+            <button id="toggleBtn" onclick="toggleMode()"
+                class="text-blue-600 hover:underline font-bold ml-1">Sign up</button>
+        </p>
+    </div>
+
+    <script src="./api.js"></script>
+    <script>
+        localStorage.removeItem("access_token");
+
+        let isLoginMode = true;
+
+        // ── Toggle between Login and Register ──────────────────────────
+        function toggleMode() {
+            isLoginMode = !isLoginMode;
+            clearStatus();
+
+            document.getElementById("loginForm").classList.toggle("hidden", !isLoginMode);
+            document.getElementById("registerForm").classList.toggle("hidden", isLoginMode);
+
+            document.getElementById("formTitle").textContent     = isLoginMode ? "Welcome Back"              : "Create Account";
+            document.getElementById("formSubtitle").textContent  = isLoginMode ? "Manage your expenses with ease" : "Sign up and start tracking today";
+            document.getElementById("toggleText").textContent    = isLoginMode ? "Don't have an account?"   : "Already have an account?";
+            document.getElementById("toggleBtn").textContent     = isLoginMode ? "Sign up"                  : "Sign in";
+
+            // Clear input fields on switch
+            ["loginUsername","loginPassword","regUsername","regPassword","regConfirmPassword"]
+                .forEach(id => document.getElementById(id).value = "");
+        }
+
+        // ── Status helper ──────────────────────────────────────────────
+        function showStatus(message, type = "error") {
+            const el = document.getElementById("statusMsg");
+            el.textContent = message;
+            el.className = type === "error"
+                ? "mb-4 px-4 py-3 rounded-lg text-sm font-medium bg-red-100 text-red-700 border border-red-300"
+                : "mb-4 px-4 py-3 rounded-lg text-sm font-medium bg-green-100 text-green-700 border border-green-300";
+            el.classList.remove("hidden");
+        }
+
+        function clearStatus() {
+            const el = document.getElementById("statusMsg");
+            el.classList.add("hidden");
+            el.textContent = "";
+        }
+
+        function setButtonLoading(btn, loading, originalText) {
+            btn.disabled = loading;
+            btn.textContent = loading ? "Please wait..." : originalText;
+        }
+
+        // ── LOGIN ──────────────────────────────────────────────────────
+        document.getElementById("loginForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            clearStatus();
+
+            const username = document.getElementById("loginUsername").value.trim();
+            const password = document.getElementById("loginPassword").value;
+            const btn = this.querySelector("button[type='submit']");
+            setButtonLoading(btn, true, "Sign In");
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Incorrect username or password.");
+                }
+
+                localStorage.setItem("access_token", data.access_token);
+                window.location.replace("index.html");
+
+            } catch (error) {
+                showStatus(error.message, "error");
+                setButtonLoading(btn, false, "Sign In");
+            }
+        });
+
+        // ── REGISTER ───────────────────────────────────────────────────
+        document.getElementById("registerForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            clearStatus();
+
+            const username        = document.getElementById("regUsername").value.trim();
+            const password        = document.getElementById("regPassword").value;
+            const confirmPassword = document.getElementById("regConfirmPassword").value;
+            const btn = this.querySelector("button[type='submit']");
+
+            // Client-side validation before hitting the API
+            if (username.length < 3) {
+                return showStatus("Username must be at least 3 characters.", "error");
+            }
+            if (password.length < 6) {
+                return showStatus("Password must be at least 6 characters.", "error");
+            }
+            if (password !== confirmPassword) {
+                return showStatus("Passwords do not match.", "error");
+            }
+
+            setButtonLoading(btn, true, "Create Account");
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Registration failed.");
+                }
+
+                // Backend returns a token on register — auto-login directly
+                localStorage.setItem("access_token", data.access_token);
+                showStatus("Account created! Redirecting...", "success");
+                setTimeout(() => window.location.replace("index.html"), 1000);
+
+            } catch (error) {
+                showStatus(error.message, "error");
+                setButtonLoading(btn, false, "Create Account");
+            }
+        });
+    </script>
+</body>
+</html>
