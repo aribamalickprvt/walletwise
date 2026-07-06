@@ -8,7 +8,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-slate-50 font-sans">
-
     <div class="flex min-h-screen">
         <aside class="w-64 bg-slate-900 text-white hidden md:flex flex-col">
             <div class="p-6">
@@ -40,8 +39,6 @@
                     + Add Expense
                 </button>
             </header>
-
-            <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <p class="text-slate-500 text-sm mb-1">Total Spent This Month</p>
@@ -59,8 +56,6 @@
                     <p id="topCategoryAmount" class="text-slate-400 text-sm mt-2">No data yet</p>
                 </div>
             </div>
-
-            <!-- Expenses Table -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <div class="p-6 border-b border-slate-50">
                     <h3 class="font-bold text-slate-800">Recent Transactions</h3>
@@ -76,7 +71,6 @@
                         </tr>
                     </thead>
                     <tbody id="expensesTableBody" class="divide-y divide-slate-100">
-                        <!-- Rows injected by renderExpensesTable() -->
                         <tr id="emptyRow">
                             <td colspan="5" class="p-8 text-center text-slate-400">No expenses yet. Click "+ Add Expense" to get started.</td>
                         </tr>
@@ -85,7 +79,6 @@
             </div>
         </main>
     </div>
-
     <!-- Add Expense Modal -->
     <div id="addModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
@@ -121,20 +114,13 @@
 
     <script src="api.js"></script>
     <script>
-        // ── Auth Guard ──────────────────────────────────────────────────
         const token = getAuthToken();
         if (!token) {
             window.location.replace("login.html");
         }
-
-        // Show logged-in username from JWT payload
-        try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             document.getElementById("usernameDisplay").textContent = payload.sub || "User";
-        } catch (e) { /* silently ignore if token is malformed */ }
-
-
-        // ── Category color map ──────────────────────────────────────────
+ 
         const CATEGORY_COLORS = {
             food:       "bg-green-100 text-green-700",
             rent:       "bg-purple-100 text-purple-700",
@@ -148,13 +134,10 @@
         function getCategoryColor(category) {
             return CATEGORY_COLORS[category.toLowerCase()] || "bg-slate-100 text-slate-700";
         }
-
-
-        // ── renderExpensesTable ─────────────────────────────────────────
+        // renderExpensesTable 
         function renderExpensesTable(expenses) {
             const tbody = document.getElementById("expensesTableBody");
-            tbody.innerHTML = ""; // Clear previous rows
-
+            tbody.innerHTML = ""; 
             if (expenses.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -164,10 +147,8 @@
                     </tr>`;
                 return;
             }
-
-            // Sort by date descending (most recent first)
+            // Sort by date descending 
             const sorted = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
-
             sorted.forEach(expense => {
                 const colorClass = getCategoryColor(expense.category);
                 const formattedDate = new Date(expense.date + "T00:00:00").toLocaleDateString("en-US", {
@@ -194,11 +175,7 @@
                 tbody.appendChild(row);
             });
         }
-
-
-        // ── updateSummaryCards ──────────────────────────────────────────
         function updateSummaryCards(expenses) {
-            // Total spent
             const total = expenses.reduce((sum, e) => sum + e.amount, 0);
             document.getElementById("totalSpent").textContent = `$${total.toFixed(2)}`;
             document.getElementById("expenseCount").textContent =
@@ -211,7 +188,6 @@
                 document.getElementById("highestExpenseDesc").textContent =
                     highest.description || highest.category;
             }
-
             // Top category by total spend
             if (expenses.length > 0) {
                 const categoryTotals = {};
@@ -226,21 +202,17 @@
                     `$${topCat[1].toFixed(2)} total`;
             }
         }
-
-
-        // ── Load Dashboard Data ─────────────────────────────────────────
-        async function loadDashboardData() {
+        // Load Dashboard Data  
+  async function loadDashboardData() {
             try {
                 const response = await fetch(`${API_URL}/expenses/`, {
                     method: "GET",
                     headers: { "Authorization": `Bearer ${token}` }
                 });
-
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.detail || `Server responded with status ${response.status}`);
                 }
-
                 const expenses = await response.json();
                 renderExpensesTable(expenses);
                 updateSummaryCards(expenses);
@@ -253,23 +225,17 @@
                 document.querySelector("main").prepend(errorAlert);
             }
         }
-
-
-        // ── Add Expense Modal ───────────────────────────────────────────
+        //  Add Expense Modal 
         function openAddModal() {
-            // Default date to today
             document.getElementById("newDate").value = new Date().toISOString().split("T")[0];
             document.getElementById("addModal").classList.remove("hidden");
         }
-
         function closeAddModal() {
             document.getElementById("addModal").classList.add("hidden");
-            // Clear fields
             ["newAmount", "newCategory", "newDate", "newDescription"].forEach(id => {
                 document.getElementById(id).value = "";
             });
         }
-
         async function submitExpense() {
             const amount      = parseFloat(document.getElementById("newAmount").value);
             const category    = document.getElementById("newCategory").value.trim();
@@ -280,7 +246,6 @@
                 alert("Please fill in Amount, Category, and Date.");
                 return;
             }
-
             try {
                 const response = await fetch(`${API_URL}/expenses/`, {
                     method: "POST",
@@ -290,50 +255,34 @@
                     },
                     body: JSON.stringify({ amount, category, date, description: description || null })
                 });
-
                 if (!response.ok) {
                     const err = await response.json().catch(() => ({}));
                     throw new Error(err.detail || "Failed to save expense.");
                 }
-
                 closeAddModal();
-                loadDashboardData(); // Refresh the table and cards
-
+                loadDashboardData();  
             } catch (error) {
                 alert("Error adding expense: " + error.message);
             }
         }
-
-
-        // ── Delete Expense ──────────────────────────────────────────────
         async function deleteExpense(expenseId) {
             if (!confirm("Delete this expense?")) return;
-
             try {
                 const response = await fetch(`${API_URL}/expenses/${expenseId}`, {
                     method: "DELETE",
                     headers: { "Authorization": `Bearer ${token}` }
                 });
-
                 if (!response.ok) {
                     const err = await response.json().catch(() => ({}));
                     throw new Error(err.detail || "Failed to delete expense.");
                 }
-
-                // Remove row from DOM without a full reload
                 const row = document.getElementById(`expense-row-${expenseId}`);
                 if (row) row.remove();
-
-                // Reload to refresh summary cards accurately
                 loadDashboardData();
-
             } catch (error) {
                 alert("Error deleting expense: " + error.message);
             }
         }
-
-
-        // ── Bootstrap ──────────────────────────────────────────────────
         loadDashboardData();
     </script>
 </body>
