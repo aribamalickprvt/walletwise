@@ -7,10 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 flex items-center justify-center min-h-screen">
-
     <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-
-        <!-- Icon + Titles -->
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-xl mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -20,11 +17,7 @@
             <h1 id="formTitle" class="text-2xl font-bold text-slate-800">Welcome Back</h1>
             <p id="formSubtitle" class="text-slate-500">Manage your expenses with ease</p>
         </div>
-
-        <!-- Status message (error / success) -->
         <div id="statusMsg" class="hidden mb-4 px-4 py-3 rounded-lg text-sm font-medium"></div>
-
-        <!-- ── LOGIN FORM ── -->
         <form id="loginForm" class="space-y-6" autocomplete="off">
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
@@ -43,8 +36,6 @@
                 Sign In
             </button>
         </form>
-
-        <!-- ── REGISTER FORM (hidden by default) ── -->
         <form id="registerForm" class="space-y-6 hidden" autocomplete="off">
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
@@ -69,7 +60,6 @@
                 Create Account
             </button>
         </form>
-
         <!-- Toggle link -->
         <p class="text-center text-sm text-slate-600 mt-8">
             <span id="toggleText">Don't have an account?</span>
@@ -77,18 +67,13 @@
                 class="text-blue-600 hover:underline font-bold ml-1">Sign up</button>
         </p>
     </div>
-
     <script src="./api.js"></script>
     <script>
         localStorage.removeItem("access_token");
-
         let isLoginMode = true;
-
-        // ── Toggle between Login and Register ──────────────────────────
         function toggleMode() {
             isLoginMode = !isLoginMode;
             clearStatus();
-
             document.getElementById("loginForm").classList.toggle("hidden", !isLoginMode);
             document.getElementById("registerForm").classList.toggle("hidden", isLoginMode);
 
@@ -96,13 +81,11 @@
             document.getElementById("formSubtitle").textContent  = isLoginMode ? "Manage your expenses with ease" : "Sign up and start tracking today";
             document.getElementById("toggleText").textContent    = isLoginMode ? "Don't have an account?"   : "Already have an account?";
             document.getElementById("toggleBtn").textContent     = isLoginMode ? "Sign up"                  : "Sign in";
-
             // Clear input fields on switch
             ["loginUsername","loginPassword","regUsername","regPassword","regConfirmPassword"]
                 .forEach(id => document.getElementById(id).value = "");
         }
-
-        // ── Status helper ──────────────────────────────────────────────
+ // helper func
         function showStatus(message, type = "error") {
             const el = document.getElementById("statusMsg");
             el.textContent = message;
@@ -111,19 +94,16 @@
                 : "mb-4 px-4 py-3 rounded-lg text-sm font-medium bg-green-100 text-green-700 border border-green-300";
             el.classList.remove("hidden");
         }
-
         function clearStatus() {
             const el = document.getElementById("statusMsg");
             el.classList.add("hidden");
             el.textContent = "";
         }
-
         function setButtonLoading(btn, loading, originalText) {
             btn.disabled = loading;
             btn.textContent = loading ? "Please wait..." : originalText;
         }
-
-        // ── LOGIN ──────────────────────────────────────────────────────
+//Loginn
         document.getElementById("loginForm").addEventListener("submit", async function(e) {
             e.preventDefault();
             clearStatus();
@@ -154,18 +134,15 @@
                 setButtonLoading(btn, false, "Sign In");
             }
         });
-
-        // ── REGISTER ───────────────────────────────────────────────────
+ //registerr
         document.getElementById("registerForm").addEventListener("submit", async function(e) {
             e.preventDefault();
             clearStatus();
-
             const username        = document.getElementById("regUsername").value.trim();
             const password        = document.getElementById("regPassword").value;
             const confirmPassword = document.getElementById("regConfirmPassword").value;
             const btn = this.querySelector("button[type='submit']");
-
-            // Client-side validation before hitting the API
+ 
             if (username.length < 3) {
                 return showStatus("Username must be at least 3 characters.", "error");
             }
@@ -175,7 +152,6 @@
             if (password !== confirmPassword) {
                 return showStatus("Passwords do not match.", "error");
             }
-
             setButtonLoading(btn, true, "Create Account");
 
             try {
@@ -186,16 +162,13 @@
                 });
 
                 const data = await response.json();
-
                 if (!response.ok) {
                     throw new Error(data.detail || "Registration failed.");
                 }
-
-                // Backend returns a token on register — auto-login directly
+                // Backend returns a token on register  auto-login directly
                 localStorage.setItem("access_token", data.access_token);
                 showStatus("Account created! Redirecting...", "success");
                 setTimeout(() => window.location.replace("index.html"), 1000);
-
             } catch (error) {
                 showStatus(error.message, "error");
                 setButtonLoading(btn, false, "Create Account");
