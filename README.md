@@ -32,6 +32,7 @@ The `backend/` directory follows clean separation of concerns:
 Ensure your MySQL Server instance is running locally, then initialize your relational storage space:
 ```sql
 CREATE DATABASE expensetracker;
+```
 
 # Move to backend directory
 cd backend
@@ -41,6 +42,10 @@ pip install -r requirements.txt
 
 # Start the development server
 uvicorn main:app --reload --port 5000
+
+#for frontend 
+ open login.html and run with live server
+
 
 
 <img width="1408" height="768" alt=" " src="https://github.com/user-attachments/assets/bc6b4251-f4e8-46f7-8a73-b2963bc6f86e" />
